@@ -30,7 +30,7 @@ import org.apache.juli.logging.LogFactory;
 
 /**
  * Utility class to read the bootstrap Catalina configuration.
- *
+ * 这块加载的是conf下的 catalina.properties配置文件
  * @author Remy Maucherat
  */
 public class CatalinaProperties {
@@ -61,6 +61,7 @@ public class CatalinaProperties {
 
         InputStream is = null;
         try {
+            // 如果系统变量里配置了catalina.config的路径，则直接解析该路径下文件
             String configUrl = System.getProperty("catalina.config");
             if (configUrl != null) {
                 is = (new URL(configUrl)).openStream();
@@ -69,6 +70,7 @@ public class CatalinaProperties {
             handleThrowable(t);
         }
 
+        // 如果没有在系统变量里配置catalina.config的路径，则使用 ${catalina.base}/conf/catalina.properties 配置文件
         if (is == null) {
             try {
                 File home = new File(Bootstrap.getCatalinaBase());
@@ -80,6 +82,8 @@ public class CatalinaProperties {
             }
         }
 
+        // 如果也没有找到 ${catalina.base}/conf/catalina.properties 文件，则直接使用 /org/apache/catalina/startup/catalina
+        // .properties 文件
         if (is == null) {
             try {
                 is = CatalinaProperties.class.getResourceAsStream
@@ -105,6 +109,7 @@ public class CatalinaProperties {
             }
         }
 
+        // 如果没有找到，new Properties()，这是个空的配置项
         if ((is == null)) {
             // Do something
             log.warn("Failed to load catalina.properties");
@@ -113,6 +118,7 @@ public class CatalinaProperties {
         }
 
         // Register the properties as system properties
+        // 把 catalina.properties 的内容塞到 {@see System#props} 中
         Enumeration<?> enumeration = properties.propertyNames();
         while (enumeration.hasMoreElements()) {
             String name = (String) enumeration.nextElement();

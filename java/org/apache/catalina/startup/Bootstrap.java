@@ -143,12 +143,17 @@ public final class Bootstrap {
 
     private void initClassLoaders() {
         try {
+            // 创建common loader，打破双亲委派，没有把父亲设置为ApplicationClassLoader
             commonLoader = createClassLoader("common", null);
             if( commonLoader == null ) {
                 // no config file, default to this loader - we might be in a 'single' env.
+                // 没有找到 catalina.config 的 common.loader 配置，则使用这个类的类加载器，
+                // 也就是system class loader（ApplicationClassLoader），那这样感觉就会保留了双亲委派机制了
                 commonLoader=this.getClass().getClassLoader();
             }
+            // 设置Catalina loader，设置父类加载器为common loader
             catalinaLoader = createClassLoader("server", commonLoader);
+            // 设置shared loader，设置父类加载器为common loader
             sharedLoader = createClassLoader("shared", commonLoader);
         } catch (Throwable t) {
             handleThrowable(t);
@@ -158,19 +163,28 @@ public final class Bootstrap {
     }
 
 
+    /**
+     * 创建 ClassLoader
+     */
     private ClassLoader createClassLoader(String name, ClassLoader parent)
         throws Exception {
 
+        //根据catalina.properties的配置项查出配置内容
         String value = CatalinaProperties.getProperty(name + ".loader");
+
+        // 如果配置的是空，则直接使用父ClassLoader
         if ((value == null) || (value.equals("")))
             return parent;
 
+        // 变量替换
         value = replace(value);
 
         List<Repository> repositories = new ArrayList<>();
 
+        // 分割字符串
         String[] repositoryPaths = getPaths(value);
 
+        // 获取类资源路径和类别
         for (String repository : repositoryPaths) {
             // Check for a JAR URL repository
             try {
@@ -204,7 +218,10 @@ public final class Bootstrap {
 
     /**
      * System property replacement in the given string.
-     *
+     * 将占位符进行替换
+     *  1. 替换 ${catalina.home}
+     *  2. 替换 ${catalina.base}
+     *  3. 从系统变量里去找，然后替换
      * @param str The original string
      * @return the modified string
      */
@@ -254,6 +271,7 @@ public final class Bootstrap {
      */
     public void init() throws Exception {
 
+        // 初始化类加载器，打破jvm的双亲委派机制
         initClassLoaders();
 
         Thread.currentThread().setContextClassLoader(catalinaLoader);
@@ -451,7 +469,7 @@ public final class Bootstrap {
     /**
      * Main method and entry point when starting Tomcat via the provided
      * scripts.
-     *
+     * tomcat的启动入口
      * @param args Command line arguments to be processed
      */
     public static void main(String args[]) {
@@ -460,6 +478,7 @@ public final class Bootstrap {
             // Don't set daemon until init() has completed
             Bootstrap bootstrap = new Bootstrap();
             try {
+                // 初始化
                 bootstrap.init();
             } catch (Throwable t) {
                 handleThrowable(t);

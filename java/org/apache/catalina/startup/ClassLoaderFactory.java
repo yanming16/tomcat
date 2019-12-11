@@ -136,7 +136,7 @@ public final class ClassLoaderFactory {
 
 
     /**
-     * Create and return a new class loader, based on the configuration
+     * Create and return a new class loader,  basedon the configuration
      * defaults and the specified directory paths:
      *
      * @param repositories List of class directories, jar files, jar directories
@@ -224,6 +224,7 @@ public final class ClassLoaderFactory {
                 log.debug("  location " + i + " is " + array[i]);
             }
 
+        // 检查tomcat的操作权限
         return AccessController.doPrivileged(
                 new PrivilegedAction<URLClassLoader>() {
                     @Override
