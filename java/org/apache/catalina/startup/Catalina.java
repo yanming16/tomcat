@@ -537,6 +537,7 @@ public class Catalina {
 
         long t1 = System.nanoTime();
 
+        // 初始化 java.io.tmpdir 文件目录
         initDirs();
 
         // Before digester - it may be needed

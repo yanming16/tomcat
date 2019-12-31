@@ -143,7 +143,7 @@ public final class Bootstrap {
 
     private void initClassLoaders() {
         try {
-            // 创建common loader，打破双亲委派，没有把父亲设置为ApplicationClassLoader
+            // 创建common loader，打破双亲委派，没有把父亲设置为ApplicationClassLoader(真正打破的地方还在后面)
             commonLoader = createClassLoader("common", null);
             if( commonLoader == null ) {
                 // no config file, default to this loader - we might be in a 'single' env.
@@ -275,14 +275,20 @@ public final class Bootstrap {
         // 初始化类加载器，打破jvm的双亲委派机制
         initClassLoaders();
 
+        // 把 catalinaLoader 放到线程上下文里，这里是方便parentLoader可以找到它并使用他加载的类
         Thread.currentThread().setContextClassLoader(catalinaLoader);
 
+        // 把 catalinaLoader 需要加载的类进行加载，这个里面基本都是 tomcat 容器需要使用的 class
         SecurityClassLoad.securityClassLoad(catalinaLoader);
 
         // Load our startup class and call its process() method
         if (log.isDebugEnabled())
             log.debug("Loading startup class");
+
+        // 加载 Catalina 类，这个类主要是管理catalina的启动，停止等相关的命令
         Class<?> startupClass = catalinaLoader.loadClass("org.apache.catalina.startup.Catalina");
+
+        // 构造出 Catalina 类实例
         Object startupInstance = startupClass.getConstructor().newInstance();
 
         // Set the shared extensions class loader
@@ -295,8 +301,12 @@ public final class Bootstrap {
         paramValues[0] = sharedLoader;
         Method method =
             startupInstance.getClass().getMethod(methodName, paramTypes);
+
+        // 调用 Catalina#setParentClassLoader 方法，赋值 parentClassLoader 为 sharedLoader，
+        // 就应该是把一个Catalina管理的webApp实例的父类加载器赋值，tomcat的类加载器真复杂
         method.invoke(startupInstance, paramValues);
 
+        // catalina 守护者
         catalinaDaemon = startupInstance;
 
     }
@@ -321,6 +331,8 @@ public final class Bootstrap {
             param = new Object[1];
             param[0] = arguments;
         }
+
+        // 调用 Catalina 的 load 方法
         Method method =
             catalinaDaemon.getClass().getMethod(methodName, paramTypes);
         if (log.isDebugEnabled())

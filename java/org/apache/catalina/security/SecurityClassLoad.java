@@ -36,15 +36,34 @@ public final class SecurityClassLoad {
             return;
         }
 
+        // 加载tomcat核心包 org.apache.catalina.core. 下的包
         loadCorePackage(loader);
+
+        // 加载 coyote 包，这是处理connect（socat）相关的包，是一些常量类，不知道为啥不全加载了？是因为有些包用不到？
         loadCoyotePackage(loader);
+
+        // 加载 webAppClassLoader 类，webapp（war包） 将使用这个类加载器进行加载，这个类打破了双亲委派
         loadLoaderPackage(loader);
+
+        // 加载 realm 类，该类好像是做用户登录安全访问的，具体不太清楚
         loadRealmPackage(loader);
+
+        // 加载 servlet 类
         loadServletsPackage(loader);
+
+        // 加载 session 类
         loadSessionPackage(loader);
+
+        // 加载工具包
         loadUtilPackage(loader);
+
+        // 加载 Javax cookie 类
         loadJavaxPackage(loader);
+
+        // 加载 connect 包
         loadConnectorPackage(loader);
+
+        // 加载 tomcat 相关的其他的类，感觉不太好分类的类放到了这里进行加载
         loadTomcatPackage(loader);
     }
 
