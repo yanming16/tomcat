@@ -224,7 +224,7 @@ public final class ClassLoaderFactory {
                 log.debug("  location " + i + " is " + array[i]);
             }
 
-        // 检查tomcat的操作权限
+        // 检查tomcat的操作权限，返回URLClassLoader
         return AccessController.doPrivileged(
                 new PrivilegedAction<URLClassLoader>() {
                     @Override
@@ -258,6 +258,7 @@ public final class ClassLoaderFactory {
                 if (!home.getPath().equals(base.getPath())
                         && file.getPath().equals(defaultValue.getPath())
                         && !file.exists()) {
+
                     log.debug(msg);
                 } else {
                     log.warn(msg);
