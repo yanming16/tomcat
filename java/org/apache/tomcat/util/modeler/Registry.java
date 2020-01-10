@@ -621,6 +621,7 @@ public class Registry implements RegistryMBean, MBeanRegistration  {
             // The real mbean is created and registered
             DynamicMBean mbean = managed.createMBean(bean);
 
+            // 如果已经注册了，先卸载
             if(  getMBeanServer().isRegistered( oname )) {
                 if( log.isDebugEnabled()) {
                     log.debug("Unregistering existing component " + oname );

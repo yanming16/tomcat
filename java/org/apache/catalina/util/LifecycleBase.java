@@ -127,15 +127,20 @@ public abstract class LifecycleBase implements Lifecycle {
 
     @Override
     public final synchronized void init() throws LifecycleException {
+        // 校验生命周期状态
         if (!state.equals(LifecycleState.NEW)) {
             invalidTransition(Lifecycle.BEFORE_INIT_EVENT);
         }
 
         try {
+            // 设置生命周期的状态为 LifecycleState.INITIALIZING
             setStateInternal(LifecycleState.INITIALIZING, null, false);
+            // 初始化
             initInternal();
+            // 初始化结束后更新生命周期状态 LifecycleState.INITIALIZED
             setStateInternal(LifecycleState.INITIALIZED, null, false);
         } catch (Throwable t) {
+            // 这里面处理的是 Throwable, 也就是说会处理error和exception， 并且更新生命周期状态
             handleSubClassException(t, "lifecycleBase.initFail", toString());
         }
     }
@@ -433,6 +438,7 @@ public abstract class LifecycleBase implements Lifecycle {
 
     private void handleSubClassException(Throwable t, String key, Object... args) throws LifecycleException {
         ExceptionUtils.handleThrowable(t);
+        // 更新生命周期状态为 LifecycleState.FAILED
         setStateInternal(LifecycleState.FAILED, null, false);
         String msg = sm.getString(key, args);
         if (getThrowOnFailure()) {

@@ -530,11 +530,14 @@ public class StandardService extends LifecycleMBeanBase implements Service {
 
         super.initInternal();
 
+        // 先初始化 Engine 组件，考录到先把路由起起来，再初始化 connector ， 这样在接入请求时才会没有问题，一个service管理一个engine
+        // Engine 组件初始化之后，就没有再调用host组件的初始化方法
         if (engine != null) {
             engine.init();
         }
 
         // Initialize any Executors
+        // 初始化tomcat线程池，配置线程的域
         for (Executor executor : findExecutors()) {
             if (executor instanceof JmxEnabled) {
                 ((JmxEnabled) executor).setDomain(getDomain());
@@ -542,10 +545,12 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             executor.init();
         }
 
-        // Initialize mapper listener
+        // Initialize mapper listener\
+        // TODO: 2020/1/9 这个暂时没有看懂是干啥的，初始化只做了注册的行为操作
         mapperListener.init();
 
         // Initialize our defined Connectors
+        // 初始化connectors，一个service管理多个connectors
         synchronized (connectorsLock) {
             for (Connector connector : connectors) {
                 try {

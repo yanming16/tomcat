@@ -273,6 +273,7 @@ public class Catalina {
     /**
      * Create and configure the Digester we will be using for startup.
      * @return the main digester to parse server.xml
+     * 这个应该是解析配置和初始化配置的设置（server.xml），把相应的配置组件初始化
      */
     protected Digester createStartDigester() {
         long t1=System.currentTimeMillis();
@@ -551,6 +552,7 @@ public class Catalina {
         File file = null;
         try {
             try {
+                // conf/server.xml 配置文件
                 file = configFile();
                 inputStream = new FileInputStream(file);
                 inputSource = new InputSource(file.toURI().toURL().toString());
@@ -637,6 +639,8 @@ public class Catalina {
 
         // Start the new server
         try {
+            // 启动 server，server是最顶层的容器，一个tomcat只有一个server，一个server包含多个service
+            // server 的 init 其实集成的 LifecycleBase 的方法，Lifecycle管理着容器的生命周期
             getServer().init();
         } catch (LifecycleException e) {
             if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE")) {

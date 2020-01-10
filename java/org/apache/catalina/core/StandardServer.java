@@ -844,6 +844,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
             }
         }
         // Initialize our defined Services
+        // server组件 里管理多个service组件，对管理的service组件进行初始化
         for (int i = 0; i < services.length; i++) {
             services[i].init();
         }

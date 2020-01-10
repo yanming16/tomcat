@@ -231,11 +231,14 @@ public class StandardEngine extends ContainerBase implements Engine {
     }
 
 
+    // 很明显这里并没有再继续调用host组件的init方法，这个责任链就算是断掉了
     @Override
     protected void initInternal() throws LifecycleException {
         // Ensure that a Realm is present before any attempt is made to start
         // one. This will create the default NullRealm if necessary.
+        // TODO: 2020/1/9 说实话这个realm没有看懂是干啥的
         getRealm();
+        // TODO: 2020/1/9 应该是初始化了一个线程池管理Engine组件的启停
         super.initInternal();
     }
 

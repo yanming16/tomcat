@@ -144,7 +144,8 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
      *
      * @return  The name used to register the object
      */
-    protected final ObjectName register(Object obj,
+    protected final ObjectName
+    register(Object obj,
             String objectNameKeyProperties) {
 
         // Construct an object name with the right domain
